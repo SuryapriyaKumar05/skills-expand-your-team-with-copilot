@@ -1,9 +1,10 @@
 /* Color palette */
+/* Issue #4: Updated to Mergington High school colors: lime green & white */
 :root {
-  /* Primary colors */
-  --primary: #1a237e;
-  --primary-light: #534bae;
-  --primary-dark: #000051;
+  /* Primary colors — Mergington High school colors: lime green & white */
+  --primary: #4a8c1c;
+  --primary-light: #6ab52e;
+  --primary-dark: #2d5c0a;
   --primary-text: #ffffff;
 
   /* Secondary colors */
@@ -62,6 +63,8 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 90px;
+  padding-bottom: 0;
 }
 
 header h1 {
@@ -195,8 +198,8 @@ section h3 {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: #e8eaf6;
-  color: #3949ab;
+  background: #e8f5e1;
+  color: #2e6b0f;
   font-size: 0.65rem;
   font-weight: bold;
   padding: 2px 6px;
@@ -474,6 +477,35 @@ footer {
   padding: 10px;
   color: var(--text-secondary);
   font-size: 0.8rem;
+}
+
+/* Git branch background canvas */
+#git-bg-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.12;
+}
+
+/* Mascot images in header */
+.header-mascot {
+  position: absolute;
+  bottom: 0;
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+}
+
+.header-mascot-left {
+  left: 15px;
+}
+
+.header-mascot-right {
+  right: 15px;
 }
 
 /* Search and Filter Components - Updated for Sidebar */
