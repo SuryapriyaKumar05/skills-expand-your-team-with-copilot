@@ -866,3 +866,115 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeFilters();
   fetchActivities();
 });
+
+// Animated Git branch background
+(function initGitBackground() {
+  const canvas = document.getElementById("git-bg-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  const BRANCH_COLORS = ["#4a8c1c", "#6ab52e", "#2d5c0a", "#8bc34a", "#78909c", "#f57c00"];
+  const NUM_BRANCHES = 6;
+
+  let width, height, branches;
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    initBranches();
+  }
+
+  function randomBetween(a, b) {
+    return a + Math.random() * (b - a);
+  }
+
+  function initBranches() {
+    branches = [];
+    const spacing = width / (NUM_BRANCHES + 1);
+    for (let i = 0; i < NUM_BRANCHES; i++) {
+      const x = spacing * (i + 1) + randomBetween(-20, 20);
+      const color = BRANCH_COLORS[i % BRANCH_COLORS.length];
+      const commits = [];
+      let y = randomBetween(-height, 0);
+      while (y < height * 2) {
+        commits.push({ x, y, drawn: 0 });
+        y += randomBetween(60, 140);
+      }
+      branches.push({ x, color, commits, mergeTargets: [] });
+    }
+
+    // Add a few merge lines between adjacent branches
+    for (let i = 0; i < NUM_BRANCHES - 1; i++) {
+      const src = branches[i];
+      const dst = branches[i + 1];
+      const srcCommit = src.commits[Math.floor(src.commits.length / 2)];
+      const dstCommit = dst.commits[Math.floor(dst.commits.length / 2) + 1];
+      if (srcCommit && dstCommit) {
+        src.mergeTargets.push({ fromY: srcCommit.y, toX: dst.x, toY: dstCommit.y, color: dst.color, drawn: 0 });
+      }
+    }
+  }
+
+  const SCROLL_SPEED = 0.3;
+  let offset = 0;
+
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+    offset += SCROLL_SPEED;
+
+    for (const branch of branches) {
+      ctx.strokeStyle = branch.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(branch.x, 0);
+      ctx.lineTo(branch.x, height);
+      ctx.stroke();
+
+      for (const commit of branch.commits) {
+        const y = commit.y - offset;
+        if (y < -20 || y > height + 20) continue;
+        // Grow the dot
+        if (commit.drawn < 6) commit.drawn += 0.15;
+        ctx.beginPath();
+        ctx.arc(branch.x, y, commit.drawn, 0, Math.PI * 2);
+        ctx.fillStyle = branch.color;
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      for (const merge of branch.mergeTargets) {
+        const fromY = merge.fromY - offset;
+        const toY = merge.toY - offset;
+        if (Math.max(fromY, toY) < 0 || Math.min(fromY, toY) > height) continue;
+        if (merge.drawn < 1) merge.drawn += 0.008;
+        ctx.beginPath();
+        ctx.moveTo(branch.x, fromY);
+        const cpX = (branch.x + merge.toX) / 2;
+        ctx.bezierCurveTo(cpX, fromY, cpX, toY, merge.toX, toY);
+        ctx.strokeStyle = merge.color;
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = merge.drawn;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // Recycle commits that scroll off the top by moving them to the bottom
+    for (const branch of branches) {
+      for (const commit of branch.commits) {
+        if (commit.y - offset < -20) {
+          commit.y += height * 2 + randomBetween(60, 140);
+          commit.drawn = 0;
+        }
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+  draw();
+})();
